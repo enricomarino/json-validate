@@ -85,11 +85,7 @@ schema = (function (context, undefined) {
         }
 
         if (type === 'object') {
-            if (to_string.call(json) !== '[object Object]') {
-                return false;
-            }
-            // TODO
-            return true;
+            return validate_object(json, schema);
         }
 
         if (type === 'boolean') {
@@ -118,6 +114,27 @@ schema = (function (context, undefined) {
                 return false;
             }
             return true;
+        }
+
+        return true;
+    }
+
+    function validate_object (json, schema) {
+        
+        if (to_string.call(json) !== '[object Object]') {
+            return false;
+        }
+
+        var props = schema.properties,
+            prop;
+        
+        for (prop in props) {
+            if (props[prop].required && json.hasOwnProperty(prop)) {
+                return false;
+            }
+            if (!validate(json[prop], props[prop])) {
+                return false;
+            }
         }
 
         return true;
