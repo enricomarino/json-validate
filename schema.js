@@ -1,5 +1,15 @@
-schema = (function (context, undefined) {
-    
+// json-schema.js
+// JavaScript fast json schema validation library
+//
+// Copyright 2011 Enrico Marino
+// MIT license
+
+!function (name, definition) {
+    if (typeof module != 'undefined') module.exports = definition()
+    else if (typeof define == 'function' && define.amd) define(name, definition)
+    else this[name] = definition()
+}('schema', function (context, undefined) {
+
     var to_string = {}.toString;
 
     function validate (json, schema) {
