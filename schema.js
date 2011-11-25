@@ -23,18 +23,19 @@
             && schema.type.indexOf('string') === -1) {
             return false;
         }
-        if (typeof schema.maxLength !== 'undefined'
+        if (schema.maxLength !== undefined
             && json.length > schema.maxLength) {
             return false;
         }
-        if (typeof schema.minLength !== 'undefined' 
+        if (schema.minLength !== undefined 
             && json.length < schema.minLength) {
             return false;
         } 
-        if (schema.pattern && !json.match(schema.pattern)) {
+        if (schema.pattern !== undefined
+            && !json.match(schema.pattern)) {
             return false;
         }
-        if (schema.enum) {
+        if (schema.enum !== undefined) {
             return schema.enum.some(function (value) {
                 return json === value;
             });
@@ -53,19 +54,19 @@
             && schema.type.indexOf('number') === -1) {
             return false;
         }
-        if (typeof schema.minimum !== 'undefined'
+        if (schema.minimum !== undefined
             && json < schema.minimum) {
             return false;
         }
-        if (typeof schema.maximum !== 'undefined' 
+        if (schema.maximum !== undefined 
             && json > schema.maximum) {
             return false;
         }
-        if (typeof schema.maxDecimal !== 'undefined' 
+        if (schema.maxDecimal !== undefined 
             && json.toString().match(new RegExp("\\.[0-9]{" + (schema.maxDecimal + 1) + ",}"))) {
             return false;
         }
-        if (typeof schema.enum !== 'undefined') {
+        if (schema.enum !== undefined) {
             return schema.enum.some(function (value) {
                 return json === value;
             });
@@ -87,15 +88,15 @@
             && schema.type.indexOf('integer') === -1) {
             return false;
         }
-        if (typeof schema.minimum !== 'undefined' 
+        if (schema.minimum !== undefined 
             && json < schema.minimum) {
             return false;
         }
-        if (typeof schema.maximum !== 'undefined' 
+        if (schema.maximum !== undefined 
             && json > schema.maximum) {
             return false;
         }
-        if (schema.enum) {
+        if (schema.enum !== undefined) {
             return schema.enum.some(function (value) {
                 return json === value;
             });
@@ -114,15 +115,15 @@
             && schema.type.indexOf('array') === -1) {
             return false;
         }
-        if (typeof schema.minItems !== 'undefined' 
+        if (schema.minItems !== undefined 
             && json.length < schema.minItems) {
             return false;
         }
-        if (typeof schema.maxItems !== 'undefined'
+        if (schema.maxItems !== undefined
             && value.length > schema.maxItems){
             return false;
         }
-        if (schema.items) {
+        if (schema.items !== undefined) {
             return !json.some(function (value) {
                 return !validate(value, schema.items);
             });
