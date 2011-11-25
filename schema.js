@@ -10,7 +10,9 @@
     else this[name] = definition
 }('schema', function (context, undefined) {
 
-    var to_string = {}.toString;
+    var to_string = {}.toString,
+        owns = {}.hasOwnProperty,
+        extend = function (d, s) { for (var p in s) (owns.call(s, p) && (d[p] = s[p])); };
 
     function string (schema, json) {
         
@@ -252,8 +254,7 @@
         return true;
     }
 
-    return {
-        validate: validate,
+    extend(validate, {
         string: string,
         number: number,
         integer: integer,
@@ -263,6 +264,10 @@
         nil: nil,
         undef: undef,
         object: object
+    });
+
+    return {
+        validate: validate
     };
 
 }(this));
