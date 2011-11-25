@@ -16,56 +16,62 @@
 
     function string (schema, json) {
         
-        if (to_string.call(json) !== '[object String]') {
+        var type = schema.type,
+            length_max = schema.maxLength,
+            length_min = schema.minLength,
+            pattern = schema.pattern,
+            enums = schema.enum,
+            length = json.length,
+            equals = function (value) { return json === values}
+        
+        if (to_string.call(type) === '[object String]' 
+            && type !== 'string' && type !== 'any') {
             return false;
         }
-        if (schema.type !== 'string'
-            && schema.type !== 'any'
-            && to_string.call(schema.type) === '[object Array]' 
-            && schema.type.indexOf('string') === -1) {
+        if (to_string.call(type) === '[object Array]' 
+            && type.indexOf('string') === -1) {
             return false;
         }
-        if (schema.maxLength !== undefined
-            && json.length > schema.maxLength) {
+        if (length_max !== undefined && length > length_max) {
             return false;
         }
-        if (schema.minLength !== undefined 
-            && json.length < schema.minLength) {
+        if (length_min !== undefined && length < length_min) {
             return false;
         } 
-        if (schema.pattern !== undefined
-            && !json.match(schema.pattern)) {
+        if (pattern !== undefined && !json.match(pattern)) {
             return false;
         }
-        if (schema.enum !== undefined) {
-            return schema.enum.some(function (value) {
-                return json === value;
-            });
+        if (enums !== undefined && !enums.some(equals)) {
+            return false;
         }
         return true;
     }
 
     function number (schema, json) {
+        console.log('number', schema, json);
+
+        var decimal = schema.maxDecimal,
+            json_string = json.toString();
 
         if (to_string.call(json) !== '[object Number]') {
             return false;
         }
-        if (schema.type !== 'number'
-            && schema.type !== 'any'
-            && to_string.call(schema.type) === '[object Array]' 
+        if (to_string.call(schema.type) === '[object String]' 
+            && schema.type !== 'number' && schema.type !== 'any') {
+            return false;        
+        }
+        if (to_string.call(schema.type) === '[object Array]' 
             && schema.type.indexOf('number') === -1) {
             return false;
         }
-        if (schema.minimum !== undefined
-            && json < schema.minimum) {
+        if (schema.minimum !== undefined && json < schema.minimum) {
             return false;
         }
-        if (schema.maximum !== undefined 
-            && json > schema.maximum) {
+        if (schema.maximum !== undefined && json > schema.maximum) {
             return false;
         }
         if (schema.maxDecimal !== undefined 
-            && json.toString().match(new RegExp("\\.[0-9]{" + (schema.maxDecimal + 1) + ",}"))) {
+            && json_string.match(new RegExp('\\.[0-9]{' + (decimal + 1) + ',}'))) {
             return false;
         }
         if (schema.enum !== undefined) {
@@ -77,6 +83,7 @@
     }
 
     function integer (schema, json) {
+        console.log('integer', schema, json);
 
         if (to_string.call(json) !== '[object Number]') {
             return false;
@@ -84,9 +91,12 @@
         if (json % 1 !== 0) {
             return false;
         }
-        if (schema.type !== 'integer'
-            && schema.type !== 'any'
-            && to_string.call(schema.type) === '[object Array]' 
+        if (to_string.call(schema.type) === '[object String]' 
+            && schema.type !== 'integer'
+            && schema.type !== 'any') {
+            return false;
+        }
+        if (to_string.call(schema.type) === '[object Array]' 
             && schema.type.indexOf('integer') === -1) {
             return false;
         }
@@ -107,13 +117,17 @@
     }
 
     function array (schema, json) {
+        console.log('array', schema, json);
 
         if (to_string.call(json) !== '[object Array]') {
             return false;
         }
-        if (schema.type !== 'array'
-            && schema.type !== 'any'
-            && to_string.call(schema.type) === '[object Array]' 
+        if (to_string.call(schema.type) === '[object String]'
+            && schema.typeschema.type !== 'array'
+            && schema.type !== 'any') {
+            return false;
+        }
+        if (to_string.call(schema.type) === '[object Array]' 
             && schema.type.indexOf('array') === -1) {
             return false;
         }
@@ -134,13 +148,17 @@
     }
 
     function bool (schema, json) {
-        
+        console.log('bool', schema, json);
+
         if (to_string.call(json) !== '[object Boolean]') {
             return false;
         }
-        if (schema.type !== 'boolean'
-            && scehma.type !== 'any'
-            && to_string.call(schema.type) === '[object Array]' 
+        if (to_string.call(schema.type) === '[object Array]' 
+            && schema.type !== 'boolean'
+            && scehma.type !== 'any') {
+                
+        }
+        if (to_string.call(schema.type) === '[object Array]' 
             && schema.type.indexOf('boolean') === -1) {
             return false;
         }
@@ -148,13 +166,17 @@
     }
 
     function date (schema, json) {
+        console.log('date', schema, json);
         
         if (to_string.call(json) !== '[object Date]') {
             return false;
         }
-        if (schema.type !== 'date'
-            && schema.type !== 'any'
-            && to_string.call(schema.type) === '[object Array]' 
+        if (to_string.call(schema.type) === '[object String]' 
+            && schema.type !== 'date'
+            && schema.type !== 'any') {
+            return false;
+        }
+        if (to_string.call(schema.type) === '[object Array]' 
             && schema.type.indexOf('date') === -1) {
             return false;
         }
@@ -162,13 +184,17 @@
     }
 
     function nil (schema, json) {
-        
+        console.log('nil', schema, json);
+       
         if (to_string.call(json) !== '[object Null]') {
             return false;
         }
-        if (schema.type !== 'null'
-            && schema.type !== 'any'
-            && to_string.call(schema.type) === '[object Array]' 
+        if (to_string.call(schema.type) === '[object String]' 
+            && schema.type !== 'null'
+            && schema.type !== 'any') {
+            return false;
+        }
+        if (to_string.call(schema.type) === '[object Array]' 
             && schema.type.indexOf('null') === -1) {
             return false;
         }
@@ -176,6 +202,7 @@
     }
 
     function undef (schema, json) {
+        console.log('undef', schema, json);
         
         if (to_string.call(json) !== '[object Undefined]') {
             return false;
@@ -187,15 +214,19 @@
     }
 
     function object (schema, json) {
-        
+        console.log('object', schema, json);
+
         var properties = schema.properties;
 
         if (to_string.call(json) !== '[object Object]') {
             return false;
         }
-        if (schema.type !== 'object'
-            && schema.type !== 'any'
-            && to_string.call(schema.type) === '[object Array]' 
+        if (to_string.call(schema.type) === '[object String]' 
+            && schema.type !== 'object'
+            && schema.type !== 'any') {
+            return false; 
+        }
+        if (to_string.call(schema.type) === '[object Array]' 
             && schema.type.indexOf('object') === -1) {
             return false;
         }        
@@ -220,8 +251,7 @@
     }
 
     function validate (schema, json) {
-
-        var type = schema.type;
+        console.log('validate', schema, json);
 
         if (to_string.call(json) === '[object String]') {
             return string(schema, json);
