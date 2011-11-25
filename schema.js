@@ -268,7 +268,6 @@
     extend(validate, {
         string: string,
         number: number,
-        integer: integer,
         array: array,
         bool: bool,
         date: date,
