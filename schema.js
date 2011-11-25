@@ -58,7 +58,7 @@
         }
         
         var type = schema.type,
-            minimum = schama.minimum,
+            minimum = schema.minimum,
             maximum = schema.maximum,
             decimal = schema.maxDecimal,
             enums = schema.enums,
@@ -205,8 +205,7 @@
         }
         
         var type = schema.type,
-            properties = schema.properties,
-            keys = Object.keys;
+            properties = schema.properties;
 
         if (to_string.call(type) === '[object String]' 
             && type !== 'object' && type !== 'any') {
@@ -216,7 +215,7 @@
             && type.indexOf('object') === -1) {
             return false;
         }        
-        if (keys(properties)
+        if (Object.keys(properties)
                 .filter(function (property) {
                     return properties[property].required;
                 })
@@ -225,9 +224,9 @@
                 })) {
             return false
         }
-        if (keys(properties)
+        if (Object.keys(properties)
                 .some(function (property) {
-                    return !validate(schema[property], json[property]);
+                    return !validate(properties[property], json[property]);
                 })) {
             return false;            
         }
