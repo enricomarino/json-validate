@@ -155,11 +155,22 @@
         if (length_max !== undefined && length > length_max){
             return false;
         }
-        if (items !== undefined) {
-            return !json.some(function (value) {
+        if (items !== undefined
+            && to_string.call(items) === '[object Object]'
+            && json.some(function (value) {
                 return !validate(value, items);
-            });
+            })
+        ){
+            return false;
         }
+        if (items !== undefined
+            && to_string.call(items) === '[object Array]'
+            && json.some(function (value, i) {
+                return !validate(items[i], value);
+            })
+        ) {
+            return false;
+        } 
         if (unique !== undefined && unique === true) {
             for (i = 0; i < length; i += 1) {
                 for (j = i + 1; j < length; j += 1) {
