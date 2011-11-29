@@ -282,7 +282,8 @@
         var type = schema.type,
             disallow = schema.disallow,
             properties = schema.properties,
-            pattern_properties = schema.patternProperties;
+            pattern_properties = schema.patternProperties,
+            additional_properties = schema.additionalProperties;
 
         if (to_string.call(type) === '[object String]' 
             && type !== 'object' && type !== 'any') {
@@ -333,7 +334,27 @@
         ) {
             return false;
         }
-
+        if (additional_properties !== undefined
+            && additional_properties === false
+            && Object.keys(json)
+                .some(function (key) {
+                    return !(key in properties);
+                })
+        ) {
+            return false;
+        }
+        if (additional_properties !== undefined
+            && to_string.call(additional_properties) === '[object Object]'
+            && Object.keys(json)
+                .filter(function (key) {
+                    return !(key in properties);
+                })
+                .some(function (key) {
+                    return !validate(additional_properties, json[key])
+                })
+        ) {
+            return false;
+        }
         return true;
     }
 
