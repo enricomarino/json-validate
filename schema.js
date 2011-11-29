@@ -267,7 +267,8 @@
             disallow = schema.disallow,
             properties = schema.properties,
             pattern_properties = schema.patternProperties,
-            additional_properties = schema.additionalProperties;
+            additional_properties = schema.additionalProperties,
+            dependencies = schema.dependencies;
 
         if (to_string.call(type) === '[object String]' 
             && type !== 'object' && type !== 'any') {
@@ -335,6 +336,28 @@
                 })
                 .some(function (key) {
                     return !validate(additional_properties, json[key])
+                })
+        ) {
+            return false;
+        }
+        if (dependencies !== undefined 
+            && Object.keys(dependencies)
+                .some(function (property) {
+                    var dependency = dependencies[property];
+                    if (json[property] === undefined) {
+                        return !false;
+                    }
+                    if (to_string.call(dependency) === '[object String]') {
+                        return !(dependency in json);
+                    }
+                    if (to_string.call(dependency) === '[object Array]') {
+                        return !dependency.some(function (dependency) {
+                            return !(dependency in json);
+                        });
+                    }
+                    if (to_string.call(dependency) === '[object Object]') {
+                        return !validate(dependency, json[property]);
+                    }
                 })
         ) {
             return false;
