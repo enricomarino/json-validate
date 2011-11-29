@@ -15,11 +15,6 @@
         extend = function (d, s) { for (var p in s) (owns.call(s, p) && (d[p] = s[p])); };
 
     function string (schema, json) {
-        
-        if (to_string.call(json) !== '[object String]') {
-            return false;
-        }
-
         var type = schema.type,
             disallow = schema.disallow,
             length_max = schema.maxLength,
@@ -61,11 +56,6 @@
     }
 
     function number (schema, json) {
-        
-        if (to_string.call(json) !== '[object Number]') {
-            return false;
-        }
-        
         var type = schema.type,
             disallow = schema.disallow,
             minimum = schema.minimum,
@@ -118,16 +108,12 @@
     }
 
     function array (schema, json) {
-
-        if (to_string.call(json) !== '[object Array]') {
-            return false;
-        }
-
         var type = schema.type,
             disallow = schema.disallow,
             length_min = schema.minItems,
             length_max = schema.maxItems,
             items = schema.items,
+            additional_items = schema.additionalItems,
             unique = schema.uniqueItems,
             length = json.length,
             i,
@@ -171,6 +157,10 @@
         ) {
             return false;
         } 
+        if (additional_items !== undefined
+        ) {
+            return false;    
+        }
         if (unique !== undefined && unique === true) {
             for (i = 0; i < length; i += 1) {
                 for (j = i + 1; j < length; j += 1) {
@@ -186,11 +176,6 @@
     }
 
     function bool (schema, json) {
-
-        if (to_string.call(json) !== '[object Boolean]') {
-            return false;
-        }
-        
         var type = schema.type,
             disallow = schema.disallow;
 
@@ -214,11 +199,6 @@
     }
 
     function date (schema, json) {
-        
-        if (to_string.call(json) !== '[object Date]') {
-            return false;
-        }
-        
         var type = schema.type,
             disallow = schema.disallow;
 
@@ -242,11 +222,6 @@
     }
 
     function nil (schema, json) {
-        
-        if (to_string.call(json) !== '[object Null]') {
-            return false;
-        }
-        
         var type = schema.type,
             disallow = schema.disallow;
 
@@ -270,13 +245,7 @@
     }
 
     function undef (schema, json) {
-        
-        if (to_string.call(json) !== '[object Undefined]') {
-            return false;
-        }
-        
-        var type = schema.type,
-            disallow = schema.disallow;
+        var type = schema.type;
 
         if (type !== 'any') {
             return false;
@@ -284,12 +253,7 @@
         return true;
     }
 
-    function object (schema, json) {
-
-        if (to_string.call(json) !== '[object Object]') {
-            return false;
-        }
-        
+    function object (schema, json) {        
         var type = schema.type,
             disallow = schema.disallow,
             properties = schema.properties,
@@ -398,17 +362,6 @@
 
         return true;
     }
-
-    extend(validate, {
-        string: string,
-        number: number,
-        array: array,
-        bool: bool,
-        date: date,
-        nil: nil,
-        undef: undef,
-        object: object
-    });
 
     return {
         validate: validate
