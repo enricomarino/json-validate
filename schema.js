@@ -146,20 +146,29 @@
             && json.some(function (value) {
                 return !validate(value, items);
             })
-        ){
+        ) {
             return false;
         }
         if (items !== undefined
-            && to_string.call(items) === '[object Array]'
-            && json.some(function (value, i) {
-                return !validate(items[i], value);
-            })
-        ) {
-            return false;
-        } 
-        if (additional_items !== undefined
-        ) {
-            return false;    
+            && to_string.call(items) === '[object Array]') 
+        {
+            if ((additional_items === undefined 
+                || additional_items === false)
+                && json.some(function (value, i) {
+                    return !validate(items[i], value);
+                })
+            ) {
+                return false;
+            }
+            if (additional_items !== undefined
+                && to_string.call(additional_items) === '[object Object]'
+                && json.some(function (value, i) {
+                    return !validate(items[i], value)
+                        || !validate(additional_items, value);
+                })
+            ) {
+                return false
+            }
         }
         if (unique !== undefined && unique === true) {
             for (i = 0; i < length; i += 1) {
