@@ -40,12 +40,13 @@
             minLength = schema.minLength,
             maxLength = schema.maxLength,
             enums = schema.enums,
-            divisibleBy = schema.divisibleBy;
+            divisibleBy = schema.divisibleBy,
+            result;
         
 //5.1.  type
 //    This attribute defines what the primitive type or the schema of the
 //    instance MUST be in order to validate.  
-        if (type !== undefined) {
+        if (type !== undefined && value !== undefined) {
 
 //    This attribute can take one of two forms:
 
@@ -55,56 +56,45 @@
 //            The following are acceptable string values:
 
 //            string  Value MUST be a string.
-                if (type === 'string') {
-                    if (to_string.call(value) !== '[object String]') {
-                        return path + ' value MUST be a string';
-                    }
+                if (type === 'string'
+                        && to_string.call(value) !== '[object String]') {
+                    return path + ' value MUST be a string';
                 }
 //            number  Value MUST be a number, floating point numbers are
 //                allowed.
-                else if (type === 'number') {
-                    if (to_string.call(value) !== '[object Number]') {
-                        return path + ' value MUST be a number';
-                    }
+                else if (type === 'number' 
+                        && to_string.call(value) !== '[object Number]') {
+                    return path + ' value MUST be a number';
                 }
 //            integer  Value MUST be an integer, no floating point numbers are
 //                allowed.  This is a subset of the number type.
-                else if (type === 'integer') {
-                    if (to_string.call(value) !== '[object Number]') {
-                        return path + ' value MUST be a number';
-                    }
-                    if (value % 1 !== 0) {
-                        return path + ' value MUST be an integer, '
-                            + 'no floating point numbers are allowed.';
-                    }
+                else if (type === 'integer'
+                        && to_string.call(value) !== '[object Number]'
+                        && value % 1 !== 0) {
+                    return path + ' value MUST be an integer';
                 }
 //            boolean  Value MUST be a boolean.
-                else if (type === 'boolean') {
-                    if (to_string.call(value) !== '[object Boolean]') {
-                        return path + ' value MUST be a boolean';
-                    }
+                else if (type === 'boolean'
+                        && to_string.call(value) !== '[object Boolean]') {
+                    return path + ' value MUST be a boolean';
                 }
 //            object  Value MUST be an object.
-                else if (type === 'object') {
-                    if (to_string.call(value) !== '[object Object]') {
-                        return path + ' value MUST be an object';
-                    }
+                else if (type === 'object'
+                        && to_string.call(value) !== '[object Object]') {
+                    return path + ' value MUST be an object';
                 }
 //            array  Value MUST be an array.
-                else if (type === 'array') {
-                    if (to_string.call(value) !== '[object Array]') {
-                        return path + ' value MUST be an array';
-                    }
+                else if (type === 'array'
+                        && to_string.call(value) !== '[object Array]') {
+                    return path + ' value MUST be an array';
                 }
 //            null  Value MUST be null.  Note this is mainly for purpose of
 //                being able use union types to define nullability.  If this type
 //                is not included in a union, null values are not allowed (the
 //                primitives listed above do not allow nulls on their own).
-                else if (type === 'null') {
-                    if (!options.union) {
-                        return path + ' type is not included in a union, '
-                            + 'null values are not allowed';
-                    }
+                else if (type === 'null' && !options.union) {
+                    return path + ' type is not included in a union, '
+                        + 'null values are not allowed';
                 }
 //            any  Value MAY be of any type including null.
 //            If the property is not defined or is not in this list, then any
@@ -119,9 +109,11 @@
 //            the simple type definitions, or valid by one of the schemas, in
 //            the array.
             else if (to_string.call(type) === '[object Array]') {
-                if (!type.some(function (type) {
-                    return validate(value, type, { union: true, path: path });
-                })) {
+                path = 
+                result = type.some(function (type) {
+                    return validate(type, value, { union: true, path: path });
+                });
+                if (!result) {
                     return path + ' value is not valid';
                 }
             }
@@ -137,12 +129,13 @@
 //    instance property value MUST be valid according to the schema from
 //    the property definition.  Properties are considered unordered, the
 //    order of the instance properties MAY be in any order.
-        if (properties !== undefined 
-            && to_string.call(value) === '[object Object]') {
-            if(Object.keys(properties).some(function (property) {
-                return validate(value[property], properties[property], {
+        if (properties !== undefined && value !== undefined
+                && to_string.call(value) === '[object Object]') {
+            result = Object.keys(properties).some(function (property) {
+                return validate(properties[property], value[property], {
                     path: path + '/' + property});
-            })) {
+            });
+            if (!result) {
                 return path + ' is not valid';
             }
         }
@@ -155,16 +148,16 @@
 //    matches the name of a property on the instance object, the value of
 //    the instance's property MUST be valid against the pattern name's
 //    schema value.
-        if (patternProps !== undefined 
-            && to_string.call(value) === '[object Object]') {
-            if (Object.keys(patternProps).some(function (pattern) {
-                    Object.keys(value).some(function (key) {
-                        return key.match(pattern)
-                            && !validate(value[key], patternProps[pattern], 
-                                {path: path + '/' + key});
-                    })
-                })
-            ) {
+        if (patternProps !== undefined && value !== undefined
+                && to_string.call(value) === '[object Object]') {
+            result = Object.keys(patternProps).some(function (pattern) {
+                Object.keys(value).some(function (key) {
+                    return key.match(pattern)
+                        && !validate(patternProps[pattern], value[key],
+                            {path: path + '/' + key});
+                });
+            });
+            if (result) {
                 return path + ' is not valid';
             }
         }
@@ -176,8 +169,8 @@
 //    additional properties are allowed beyond the properties defined in
 //    the schema.  The default value is an empty schema which allows any
 //    value for additional properties.
-        if (additionalProperties !== undefined
-            && to_string.call(value) === '[object Object]') {
+        if (additionalProperties !== undefined && value !== undefined
+                && to_string.call(value) === '[object Object]') {
             
             if (additionalProperties === false) {
                 if (Object.keys(value).some(function (key) {
@@ -204,7 +197,7 @@
 //    This attribute defines the allowed items in an instance array, and
 //    MUST be a schema or an array of schemas.  The default value is an
 //    empty schema which allows any value for items in the instance array.
-        if (items !== undefined
+        if (items !== undefined && value !== undefined
             && to_string.call(value) === '[object Array]') {
 
 //    When this attribute value is a schema and the instance value is an
@@ -266,10 +259,8 @@
 //    This attribute indicates if the instance must have a value, and not
 //    be undefined.  This is false by default, making the instance
 //    optional.
-        if (required !== undefined) {
-            if (value === undefined) {
-                return path + ' is required and MUST have a value';
-            }
+        if (required !== undefined && value === undefined) {
+            return path + ' is required and MUST have a value';
         }
 
 // 5.8.  dependencies
@@ -278,7 +269,7 @@
 //    with the same name as a property in this attribute's object, then the
 //    instance must be valid against the attribute's property value
 //    (hereafter referred to as the "dependency value").
-        if (dependencies !== undefined 
+        if (dependencies !== undefined && value !== undefined
             && to_string.call(value) === '[object Object]'
             && Object.keys(dependencies).some(function (key) {
 
@@ -310,7 +301,7 @@
                     return !validate(dependency, value[key]);
                 }
             })
-        ){
+        ) {
             return path + ' MUST be valid according to depenencies ' 
                 + dependencies;
         }
@@ -319,20 +310,18 @@
 //    This attribute defines the minimum value of the instance property
 //    when the type of the instance value is a number.
         if (minimum !== undefined
-            && to_string.call(value) === '[object Number]') {
-            if (value <= minimum) {
-                return path + ' MUST be greater or equal than ' + minimum;
-            }
+                && to_string.call(value) === '[object Number]'
+                && value <= minimum) {
+            return path + ' MUST be greater or equal than ' + minimum;
         }
 
 // 5.10.  maximum
 //    This attribute defines the maximum value of the instance property
 //    when the type of the instance value is a number.
         if (maximum !== undefined
-            && to_string.call(value) === '[object Number]') {
-            if (value >= maximum) {
-                return path + ' MUST be less or equal than ' + minimum;
-            }
+                && to_string.call(value) === '[object Number]'
+                && value >= maximum) {
+            return path + ' MUST be less or equal than ' + minimum;
         }
 
 //5.11.  exclusiveMinimum
@@ -341,10 +330,9 @@
 //    "minimum" attribute.  This is false by default, meaning the instance
 //    value can be greater then or equal to the minimum value.
         if (exclusiveMinimum !== undefined
-            && to_string.call(value) === '[object Number]') {
-            if (value < exclusiveMinimum) {
-                return path + ' MUST be greater than ' + exclusiveMinimum;
-            }
+                && to_string.call(value) === '[object Number]'
+                && value < exclusiveMinimum) {
+            return path + ' MUST be greater than ' + exclusiveMinimum;
         }
 
 // 5.12.  exclusiveMaximum
@@ -353,30 +341,27 @@
 //    "maximum" attribute.  This is false by default, meaning the instance
 //    value can be less then or equal to the maximum value.
         if (exclusiveMaximum !== undefined
-            && to_string.call(value) === '[object Number]') {
-            if (value > exclusiveMaximum) {
-                return path + ' MUST be less than ' + exclusiveMaximum;
-            }
+                && to_string.call(value) === '[object Number]'
+                && value > exclusiveMaximum) {
+            return path + ' MUST be less than ' + exclusiveMaximum;
         }
 
 // 5.13.  minItems
 //    This attribute defines the minimum number of values in an array when
 //    the array is the instance value.
         if (minItems !== undefined
-            && to_string.call(value) === '[object Array]') {
-            if (value.length < minItems) {
-                return path + ' MUST have more than ' + minItems + ' items';
-            }
+                && to_string.call(value) === '[object Array]'
+                && value.length < minItems) {
+            return path + ' MUST have more than ' + minItems + ' items';
         }
 
 // 5.14.  maxItems
 //    This attribute defines the maximum number of values in an array when
 //    the array is the instance value.
         if (maxItems !== undefined
-            && to_string.call(value) === '[object Array]') {
-            if (value.length > maxItems) {
-                return path + ' MUST have less than ' + maxItems + ' items';
-            }
+                && to_string.call(value) === '[object Array]'
+                && value.length > maxItems) {
+            return path + ' MUST have less than ' + maxItems + ' items';
         }
 
 // 5.15.  uniqueItems
@@ -397,18 +382,17 @@
 //       are objects, contains the same property names, and each property
 //       in the object is equal to the corresponding property in the other
 //       object.
-        if (uniqueItems !== undefined 
-            && to_string.call(value) === '[object Array]'
-            && uniqueItems === true
-        ) {
-            for (var i = 0, length = value.length; i < length; i += 1) {
-                for (var j = i + 1; j < length; j += 1) {
-                    if (i in value) {
-                        if (value[i] === value[j]) {
-                            return path + ' is not valid';
-                        }
-                    }
-                }
+        if (uniqueItems !== undefined && uniqueItems === true
+                && to_string.call(value) === '[object Array]') {
+            
+            result = value.some(function (x, i) {
+                return value.slice(i+1).some(function (y, j) {
+                    return x === j;
+                });
+            });
+            
+            if (result) {
+                return path + ' is not valid';
             }
         }
 
@@ -418,8 +402,8 @@
 //    Regular expressions SHOULD follow the regular expression
 //    specification from ECMA 262/Perl 5
         if (pattern !== undefined 
-            && to_string.call(value) === '[object String]'
-            && !value.match(pattern)) {
+                && to_string.call(value) === '[object String]'
+                && !value.match(pattern)) {
             return path + ' MUST match the regular expression ' + pattern;
         }
 
@@ -427,9 +411,8 @@
 //    When the instance value is a string, this defines the minimum length
 //    of the string.
         if (minLength !== undefined 
-            && to_string.call(value) === '[object String]'
-            && value.length < minLength
-        ) {
+                && to_string.call(value) === '[object String]'
+                && value.length < minLength) {
             return path + ' length MUST be greater than ' + minLength;
         }
 
@@ -437,9 +420,8 @@
 //    When the instance value is a string, this defines the maximum length
 //    of the string.
         if (maxLength !== undefined 
-            && to_string.call(value) === '[object String]'
-            && value.length > maxLength
-        ) {
+                && to_string.call(value) === '[object String]'
+                && value.length > maxLength) {
             return path + ' length MUST be less than ' + maxLength;
         }
 
@@ -451,11 +433,11 @@
 //    values in the array in order for the schema to be valid.  Comparison
 //    of enum values uses the same algorithm as defined in "uniqueItems"
 //    (Section 5.15).
-        if (enums !== undefined 
-            && !enums.some(function (item) {
-                return value === item;
-            })) {
-            return path + ' MUST be one of the value in ' + enums;
+        if (enums !== undefined && value !== undefined) {
+            result = enums.some(function (item) { return value === item; });
+            if (!result) {
+                return path + ' MUST be one of the value in ' + enums;
+            }
         }
 
 // 5.24.  divisibleBy
@@ -463,10 +445,10 @@
 //    divisible by with no remainder (the result of the division must be an
 //    integer.)  The value of this attribute SHOULD NOT be 0.
         if (divisibleBy !== undefined
-            && to_string.call(value) === '[object String]'
-            && value % divisibleBy !== 0) {
+                && to_string.call(value) === '[object String]'
+                && value % divisibleBy !== 0) {
             return path + ' MUST be divisible by ' + divisibleBy;
-        }        
+        }
 
         return true;
     }
