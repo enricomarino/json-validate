@@ -13,9 +13,22 @@
     var to_string = {}.toString;
  
     function validate (schema, value, options) {
-        schema = schema || value.$schema;
         options = options || {};
 
+// 5.29.  $schema
+//    This attribute defines a URI of a JSON Schema that is the schema of
+//    the current schema.  When this attribute is defined, a validator
+//    SHOULD use the schema referenced by the value's URI (if known and
+//    available) when resolving Hyper Schema (Section 6) links
+//    (Section 6.1).
+
+//    A validator MAY use this attribute's value to determine which version
+//    of JSON Schema the current schema is written in, and provide the
+//    appropriate validation features and behavior.  Therefore, it is
+//    RECOMMENDED that all schema authors include this attribute in their
+//    schemas to prevent conflicts with future JSON Schema specification
+//    changes.
+        schema = schema || value.$schema;
         if (!schema) {
             return 'schema is missing';
         }
@@ -41,8 +54,118 @@
             maxLength = schema.maxLength,
             enums = schema.enums,
             divisibleBy = schema.divisibleBy,
-            result;
-        
+            defaults = schema['default'],
+            disallow = schema.disallow,
+            extend = schema['extends'],
+            result,
+            formats = {};
+
+// 5.23.  format
+//    This property defines the type of data, content type, or microformat
+//    to be expected in the instance property values.  A format attribute
+//    MAY be one of the values listed below, and if so, SHOULD adhere to
+//    the semantics describing for the format.  A format SHOULD only be
+//    used to give meaning to primitive types (string, integer, number, or
+//    boolean).  Validators MAY (but are not required to) validate that the
+//    instance values conform to a format.  The following formats are
+//    predefined:
+
+//    date-time  This SHOULD be a date in ISO 8601 format of YYYY-MM-
+//        DDThh:mm:ssZ in UTC time.  This is the recommended form of date/
+//        timestamp.
+        formats['date-time'] = ''; // TODO
+
+//    date  This SHOULD be a date in the format of YYYY-MM-DD.  It is
+//        recommended that you use the "date-time" format instead of "date"
+//        unless you need to transfer only the date part.
+        formats['date'] = ''; // TODO
+
+//    time  This SHOULD be a time in the format of hh:mm:ss.  It is
+//        recommended that you use the "date-time" format instead of "time"
+//        unless you need to transfer only the time part.
+        formats['time'] = ''; // TODO
+
+//    utc-millisec  This SHOULD be the difference, measured in
+//        milliseconds, between the specified time and midnight, 00:00 of
+//        January 1, 1970 UTC.  The value SHOULD be a number (integer or
+//        float).
+        formats['utc-millisec'] = ''; // TODO
+
+//    regex  A regular expression, following the regular expression
+//        specification from ECMA 262/Perl 5.
+        formats['regex'] = ''; // TODO
+
+//    color  This is a CSS color (like "#FF0000" or "red"), based on CSS
+//        2.1 [W3C.CR-CSS21-20070719].
+        formats['color'] = ''; // TODO
+
+//    style  This is a CSS style definition (like "color: red; background-
+//        color:#FFF"), based on CSS 2.1 [W3C.CR-CSS21-20070719].
+        formats['style'] = ''; // TODO
+
+//    phone  This SHOULD be a phone number (format MAY follow E.123).
+        formats['phone'] = ''; // TODO
+
+//    uri  This value SHOULD be a URI..
+        formats['uri'] = ''; // TODO
+
+//    email  This SHOULD be an email address.
+        formats['email'] = ''; // TODO
+
+//    ip-address  This SHOULD be an ip version 4 address.
+        formats['ip-address'] = ''; // TODO
+
+//    ipv6  This SHOULD be an ip version 6 address.
+        formats['ipv6'] = ''; // TODO
+
+//    host-name  This SHOULD be a host-name.
+        formats['host-name'] = ''; // TODO
+
+//    Additional custom formats MAY be created.  These custom formats MAY
+//    be expressed as an URI, and this URI MAY reference a schema of that
+//    format.
+
+// 5.26.  extends
+//    The value of this property MUST be another schema which will provide
+//    a base schema which the current schema will inherit from.  The
+//    inheritance rules are such that any instance that is valid according
+//    to the current schema MUST be valid according to the referenced
+//    schema.  This MAY also be an array, in which case, the instance MUST
+//    be valid for all the schemas in the array.  A schema that extends
+//    another schema MAY define additional attributes, constrain existing
+//    attributes, or add other constraints.
+
+//    Conceptually, the behavior of extends can be seen as validating an
+//    instance against all constraints in the extending schema as well as
+//    the extended schema(s).  More optimized implementations that merge
+//    schemas are possible, but are not required.  An example of using
+//    "extends":
+
+//    {
+//      "description":"An adult",
+//      "properties":{"age":{"minimum": 21}},
+//      "extends":"person"
+//    }
+
+//    {
+//      "description":"Extended schema",
+//      "properties":{"deprecated":{"type": "boolean"}},
+//      "extends":"http://json-schema.org/draft-03/schema"
+//    }
+        if (extend !== undefined && value !== undefined) {
+            if (to_string.call(extend) === '[object Object]') {
+                result = validate(extend, value, {path: path});
+            }
+            else if (to_string.call(extend) === '[object Array]') {
+                result = extend.some(function (schema) {
+                    !validate(schema, value, {path: path});
+                });
+            }
+            if (result !== true) {
+                return result;
+            }
+        }
+
 //5.1.  type
 //    This attribute defines what the primitive type or the schema of the
 //    instance MUST be in order to validate.  
@@ -109,7 +232,6 @@
 //            the simple type definitions, or valid by one of the schemas, in
 //            the array.
             else if (to_string.call(type) === '[object Array]') {
-                path = 
                 result = type.some(function (type) {
                     return validate(type, value, { union: true, path: path });
                 });
@@ -440,6 +562,22 @@
             }
         }
 
+//5.20.  default
+//    This attribute defines the default value of the instance when the
+//    instance is undefined.
+        if (defaults !== undefined && value === undefined) {
+            // I know! It will not work...
+            value = defaults;
+        }
+
+// 5.21.  title
+//    This attribute is a string that provides a short description of the
+//    instance property.
+
+// 5.22.  description
+//    This attribute is a string that provides a full description of the of
+//    purpose the instance property.
+
 // 5.24.  divisibleBy
 //    This attribute defines what value the number instance must be
 //    divisible by with no remainder (the result of the division must be an
@@ -448,6 +586,53 @@
                 && to_string.call(value) === '[object String]'
                 && value % divisibleBy !== 0) {
             return path + ' MUST be divisible by ' + divisibleBy;
+        }
+
+// 5.25.  disallow
+//    This attribute takes the same values as the "type" attribute, however
+//    if the instance matches the type or if this value is an array and the
+//    instance matches any type or schema in the array, then this instance
+//    is not valid.
+        if (disallow !== undefined && value !== undefined) {
+            if (to_string.call(type) === '[object String]') {
+                if (type === 'string'
+                        && to_string.call(value) === '[object String]') {
+                    return path + ' value MUST NOT be a string';
+                }
+                else if (type === 'number' 
+                        && to_string.call(value) === '[object Number]') {
+                    return path + ' value MUST NOT be a number';
+                }
+                else if (type === 'integer'
+                        && to_string.call(value) === '[object Number]'
+                        && value % 1 === 0) {
+                    return path + ' value MUST NOT be an integer';
+                }
+                else if (type === 'boolean'
+                        && to_string.call(value) === '[object Boolean]') {
+                    return path + ' value MUST NOT be a boolean';
+                }
+                else if (type === 'object'
+                        && to_string.call(value) === '[object Object]') {
+                    return path + ' value MUST NOT be an object';
+                }
+                else if (type === 'array'
+                        && to_string.call(value) === '[object Array]') {
+                    return path + ' value MUST NOT be an array';
+                }
+                else if (type === 'null' && !options.union) {
+                    return path + ' type is not included in a union, '
+                        + 'null values are not allowed';
+                }
+            }
+            else if (to_string.call(type) === '[object Array]') {
+                result = type.some(function (type) {
+                    return validate(type, value, { union: true, path: path });
+                });
+                if (result) {
+                    return path + ' value is not valid';
+                }
+            }
         }
 
         return true;
