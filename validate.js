@@ -254,7 +254,7 @@
                             || (!validate(additionalItems, value,
                                 {path: path + '/' + i}));
                     })
-                ) {
+                ) {
                     return 'each position in the instance array ' + path 
                         + ' MUST conform to the schema in the corresponding' 
                         + ' podition for array of schemas ' + items;
