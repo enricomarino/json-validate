@@ -54,7 +54,6 @@
             maxLength = schema.maxLength,
             enums = schema.enums,
             divisibleBy = schema.divisibleBy,
-            defaults = schema['default'],
             disallow = schema.disallow,
             extend = schema['extends'],
             result,
@@ -164,6 +163,19 @@
             if (result !== true) {
                 return result;
             }
+        }
+
+//5.20.  default
+//    This attribute defines the default value of the instance when the
+//    instance is undefined.
+        if (type !== undefined && properties !== undefined
+                && to_string.call(value) === '[object Object]') {
+            Object.keys(properties).forEach(function (key) {
+                if (value[key] === undefined 
+                        && properties[key]['default'] !== undefined) {
+                    value[key] = properties[key]['default'];
+                }
+            });
         }
 
 //5.1.  type
@@ -560,14 +572,6 @@
             if (!result) {
                 return path + ' MUST be one of the value in ' + enums;
             }
-        }
-
-//5.20.  default
-//    This attribute defines the default value of the instance when the
-//    instance is undefined.
-        if (defaults !== undefined && value === undefined) {
-            // I know! It will not work...
-            value = defaults;
         }
 
 // 5.21.  title
