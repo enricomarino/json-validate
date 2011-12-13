@@ -1,10 +1,14 @@
-# schema.js
+# json-validate
 
-JavaScript fast json schema validation library
+JavaScript json schema validation library
 
 ## API
 
-- validate(schema, json)
+- validate (schema, json)
+
+## Installation
+
+    $ npm install json-validate
 
 ## License
 
