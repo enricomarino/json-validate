@@ -4,9 +4,9 @@ JavaScript fast json schema validation library
 
 ## API
 
-- validate
+- validate(schema, json)
 
-## License 
+## License
 
 (The MIT License)
 

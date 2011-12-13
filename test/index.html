@@ -1,19 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>tests</title>
-    <link rel="stylesheet" href="mocha.css" />
-    <script src="jquery.js"></script>
-    <script src="mocha.js"></script>
-    <script>mocha.setup('bdd')</script>
-    <script src="../validate.js"></script>
-    <script src="test.string.js"></script>
-    <script src="test.number.js"></script>
-    <script src="test.array.js"></script>
-    <script>onload = mocha.run;</script>
+  <meta charset="utf-8">
+  <title>json-validate</title>
+  <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
 </head>
 <body>
-    <div id="mocha"></div>
+  <script src="./jquery.js"></script>
+  <script src="../node_modules/mocha/mocha.js"></script>
+  <script src="../lib/json-validate.js"></script>
+  <script>onload = mocha.run</script>
 </body>
 </html>

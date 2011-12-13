@@ -1,17 +1,20 @@
 {
-  "author": "Enrico Marino <enrico.marino@email.com> (onirame.no.de)",
-  "name": "json-validate",
-  "description": "JavaScript fast json schema validation library",
-  "version": "0.0.1",
-  "homepage": "https://github.com/onirame/json-validate",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/onirame/json-validate.git"
-  },
-  "main": "validate.js",
-  "engines": {
-    "node": "*"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+    "author": "Enrico Marino <enrico.marino@email.com> (onirame.no.de)"
+  , "name": "json-validate"
+  , "description": "JavaScript fast json schema validation library"
+  , "version": "0.1.0"
+  , "homepage": "https://github.com/onirame/json-validate"
+  , "repository": {
+        "type": "git"
+      , "url": "git://github.com/onirame/json-validate.git"
+    }
+  , "main": "validate.js"
+  , "engines": {
+        "node": "*"
+    }
+  , "dependencies": {}
+  , "devDependencies": {
+        "should": ">=0.3.2"
+      , "mocha": ">=0.3.0"
+    }
 }
