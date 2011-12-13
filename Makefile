@@ -1,7 +1,7 @@
 
-SRC = lib/rext.js
+SRC = lib/json-validate.js
 
-TESTS = test/*.js
+TESTS = test/test*.js
 #REPORTER = dot
 REPORTER = spec
 
