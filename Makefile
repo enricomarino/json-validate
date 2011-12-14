@@ -1,7 +1,7 @@
 
 SRC = lib/json-validate.js
 
-TESTS = test/test*.js
+TESTS = test/test.js
 #REPORTER = dot
 REPORTER = spec
 
